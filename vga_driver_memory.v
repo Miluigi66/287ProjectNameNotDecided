@@ -146,37 +146,41 @@ begin
 		vga_color <= 24'hFFFFFF;
 		flag <= 1'b0;
 	end
-	else
-	
-	begin
+	else begin
 	
 		if (active_pixels)
 		begin
 		/*
 			case(SW[9:7])
-				3'b000: vga_color = {tile_x * 6, tile_x * 8, 8'hFF};
-				3'b001: vga_color = {tile_y * 6, tile_y * 8, 8'hFF};
-				3'b010: vga_color = {tile_x * 6, tile_y * 8, tile_x * 3};
-				3'b011: vga_color = {tile_x * 6, tile_y * 8, tile_y * 3};
-				3'b100: vga_color = {tile_x * 6, tile_x * 8, tile_x * 3};
-				3'b101: vga_color = {tile_y * 6, tile_y * 8, tile_x * 3};
-				3'b110: vga_color = {tile_y * 6, tile_y * 8, tile_y * 3};
-				3'b111: vga_color = {tile_x * 6, tile_y * 8, tile_y * 3};
-				default: vga_color = {tile_x * 6, tile_y * 8, 8'hFF};
+				3'b000: vga_color <= {tile_x * 6, tile_x * 8, 8'hFF};
+				3'b001: vga_color <= {tile_y * 6, tile_y * 8, 8'hFF};
+				3'b010: vga_color <= {tile_x * 6, tile_y * 8, tile_x * 3};
+				3'b011: vga_color <= {tile_x * 6, tile_y * 8, tile_y * 3};
+				3'b100: vga_color <= {tile_x * 6, tile_x * 8, tile_x * 3};
+				3'b101: vga_color <= {tile_y * 6, tile_y * 8, tile_x * 3};
+				3'b110: vga_color <= {tile_y * 6, tile_y * 8, tile_y * 3};
+				3'b111: vga_color <= {tile_x * 6, tile_y * 8, tile_y * 3};
+				default: vga_color <= {tile_x * 6, tile_y * 8, 8'hFF};
 			endcase
 		*/
-		vga_color = {tile_x * 8'd6, tile_x * 8'd8, (tile_x ^ tile_y) * 8'd6};
-		end else
-		begin
-			vga_color = 24'd0;
-		end
+				if (tile_x==1 && tile_y==3) 
+				begin
+					vga_color <= 24'hFFC0CB;
+				end
+				else begin
+					vga_color <= {tile_x * 8'd6, tile_x * 8'd8, (tile_x ^ tile_y) * 8'd6};
+				end
+			end else
+			begin
+				vga_color <= 24'd0;
+			end
 		
 	/*
 		if (x <= 100 && x <= 10 && y == 30) 
 		begin
-			vga_color = 24'hFF00FF;
+			vga_color <= 24'hFF00FF;
 		end else begin
-			vga_color = 24'd0;
+			vga_color <= 24'd0;
 		end
 		*/
 	/*
