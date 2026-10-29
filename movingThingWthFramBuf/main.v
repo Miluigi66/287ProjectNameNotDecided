@@ -136,10 +136,25 @@ reg [23:0] vga_color;
 wire [5:0] tile_x = x[9:4]; // 0..39
 wire [4:0] tile_y = y[9:4]; // 0..29
 
+
+parameter VA_END = 10'd479;
+parameter HA_END = 10'd639;
+
+
 //player data
 reg [9:0]playerX;
 reg [9:0]playerY;
 parameter PLAYERSIZE = 15;
+
+
+wire [9:0] playerX_end = playerX + PLAYERSIZE;
+wire [9:0] playerY_end = playerY + PLAYERSIZE;
+
+
+
+
+
+
 
 // Active-High movement buttons from inverted active-low KEYs
 wire btn_up    = ~KEY[0];
@@ -177,6 +192,11 @@ begin
 end
 
 
+wire clock_divider;
+frame_tick_60Hz sixtyFpsInput(clk, rst, clk_60f); // named frame_clock_divider
+assign LEDR[9] = clk_60f;
+//assign LEDR[8] = clk_60f;
+
 always @(posedge clk or negedge rst)
 begin
 	if (rst == 1'b0)
@@ -193,11 +213,15 @@ begin
 				end
 			READ_INPUT:
 				begin
-					if (VGA_VS) begin
+					if (clk_60f) begin
+						if (~((tile_x >= playerX[9:4]) && (tile_x <= playerX_end[9:4]) &&
+							(tile_y >= playerY[9:4]) && (tile_y <= playerY_end[9:4])))
+						begin
 						if (btn_right) playerX <= MOVESPEED + playerX;
-						if (btn_left) playerX <= MOVESPEED - playerX;
+						if (btn_left) playerX <= playerX - MOVESPEED;
 						if (btn_down) playerY <= MOVESPEED + playerY;
-						if (btn_up) playerY <= MOVESPEED - playerY;
+						if (btn_up) playerY <= playerY - MOVESPEED;
+						end
 					 end
 				end
 			DRAW:
@@ -211,6 +235,10 @@ begin
 								vga_color <= 24'hFFC0CB; // Pink player
 							end 
 							// 2. Draw Checkerboard background for all other active pixels
+							else if ((tile_x == 20) & (tile_y == (SW[1] ? 20 : 25)))
+							begin
+								vga_color <= 24'h633F38; // Browm tile
+							end
 							else if (tile_x[0] ^ tile_y[0])
 							begin
 								vga_color <= 24'h000000; // Black tile
