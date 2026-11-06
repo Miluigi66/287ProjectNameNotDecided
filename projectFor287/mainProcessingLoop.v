@@ -6,7 +6,7 @@ module mainProcessingLoop	(
 	input                   	current_entity_is_player,
 	input                   	room_collision_done,
 	input                   	enemy_collision_done,
-	input						CLOCK_50,
+	input						clk,
 	input						pause,
 
 	// ----------------------------------- State outputs
