@@ -4,6 +4,17 @@
 
 
 // ---------------------------------------------------------------------- THE ENTITY DATA MEMORY BLOCK
+/* How the bits are laid out for the entity data memory block
+    35:30 - Entity ID (6 bits)
+    29:20 - X Position (10 bits)
+    19:10 - Y Position (10 bits)
+    9:8   - Direction (2 bits)
+    7:4   - AI State (4 bits)
+    3:0   - HP (4 bits)
+
+
+*/
+
 module entityData #(
     parameter DATA_WIDTH = 36,              // Size of each memory word (36 bits)
     parameter MAX_ENTITIES  = 16,            // Total number of memory slots (16 max entities)
