@@ -21,6 +21,10 @@ module mainProcessingLoop	(
 // -------------------------------------- Parameters for global state machine PROCESSING BLOCK
 `include "gameStates.vh"
 
+reg [2:0] SMN; // Next state for main loop
+reg [2:0] SGN; // Next state for game loop
+reg [2:0] SCN; // Next state for colision loop
+
 
 // -------------------------------------- Main loop next state
 always @(*)
