@@ -76,14 +76,14 @@ module gameInitiation	(
 	//input 		          		TD_VS,
 
 	//////////// VGA //////////
-	//output		          		VGA_BLANK_N,
-	//output reg	     [7:0]		VGA_B,
-	//output		          		VGA_CLK,
-	//output reg	     [7:0]		VGA_G,
-	//output		          		VGA_HS,
-	//output reg	     [7:0]		VGA_R,
-	//output		          		VGA_SYNC_N,
-	//output		          		VGA_VS
+	output		          		VGA_BLANK_N,
+	output reg	     [7:0]		VGA_B,
+	output		          		VGA_CLK,
+	output reg	     [7:0]		VGA_G,
+	output		          		VGA_HS,
+	output reg	     [7:0]		VGA_R,
+	output		          		VGA_SYNC_N,
+	output		          		VGA_VS
 
 	//////////// GPIO_0, GPIO_0 connect to GPIO Default //////////
 	//inout 		    [35:0]		GPIO_0,
@@ -97,6 +97,26 @@ module gameInitiation	(
 // The only conection between PROCESSING BLOCK and VGA BLOCK is the entiy list
 // The PROCESSING BLOCK will read the entity list and up date based on player input and AI algorithm
 // The VGA BLOCK will read the entity list and update the screen based on the entity list
+
+// ------------------------------------------------------- Top level assignments/wire/reg declarations
+// VGA driver signals
+wire [9:0]x; // current x
+wire [9:0]y; // current y - 10 bits = 1024 ... a little bit more than we need
+always @(*)
+begin
+	{VGA_R, VGA_G, VGA_B} = vga_color;
+end
+reg [23:0] vga_color;
+wire active_pixels; // is on when we're in the active draw space
+
+// Clock and reset
+wire clk;
+wire rst;
+assign clk = CLOCK_50;
+assign rst = SW[0];
+// Pause signal
+wire pause;
+assign pause = SW[1];
 
 
 
@@ -112,19 +132,18 @@ module gameInitiation	(
 `include "gameStates.vh"
 
 
-// ----------------------------------- Instantiation of State Machine Cores and other modules
-// State Machine Cores
-wire SMC, SGC, SCC;
-// State helper signals
-wire load_map_done, entity_list_done, current_entity_is_player, room_collision_done, enemy_collision_done;
-// Clock and reset
-wire clk;
-assign clk = CLOCK_50;
-wire rst;
-assign rst = ~SW[0];
-// Pause signal
-wire pause;
-assign pause = SW[1];
+// ----------------------------------- Instantiation of State Machine Cores
+// PROCESSING BLOCK
+    // State Machine Cores
+    wire SMC, SGC, SCC;
+    // State helper signals
+    wire load_map_done, entity_list_done, current_entity_is_player, room_collision_done, enemy_collision_done;
+// VGA BLOCK
+    // State Machine Cores
+    wire VGC, VEC;
+    // State helper signals
+    wire entity_mem_done, room_mem_done, tile_mem_done, color_update_done;
+
 
 
 // -------------------------------------------------------------------------------------- PROCESSING BLOCKS
@@ -140,7 +159,7 @@ assign pause = SW[1];
 
 
 
-// ----------------------------------- Instantiation of the main loop
+// ----------------------------------- Instantiation of the mainProcessingLoop
 mainProcessingLoop mainProcessingLoop_inst (
     .clock_60hz_tick(clock_60hz_tick),
     .rst(rst),
@@ -149,7 +168,7 @@ mainProcessingLoop mainProcessingLoop_inst (
     .current_entity_is_player(current_entity_is_player),
     .room_collision_done(room_collision_done),
     .enemy_collision_done(enemy_collision_done),
-    .CLOCK_50(clk),
+    .clk(clk),
     .pause(pause),
 
     .SMC(SMC),
@@ -169,20 +188,32 @@ frame_tick_60Hz frame_tick_60Hz_inst (
 // -------------------------------------------------------------------------------------- VGA BLOCKS
 
 // ----------------------------------- Instantiation of the VGA driver
-vga_driver vga_driver_inst (
+vga_driver the_vga(
     .clk(clk),
     .rst(rst),
+    .vga_clk(VGA_CLK),
+    .hsync(VGA_HS),
+    .vsync(VGA_VS),
+    .active_pixels(active_pixels),
+    .xPixel(x),
+    .yPixel(y),
     .VGA_BLANK_N(VGA_BLANK_N),
-    .VGA_B(VGA_B),
-    .VGA_CLK(VGA_CLK),
-    .VGA_G(VGA_G),
-    .VGA_HS(VGA_HS),
-    .VGA_R(VGA_R),
-    .VGA_SYNC_N(VGA_SYNC_N),
-    .VGA_VS(VGA_VS)
+    .VGA_SYNC_N(VGA_SYNC_N)
 );
 
+// ----------------------------------- Instantiation of the mainVGALoop
+mainVGALoop mainVGALoop_inst (
+    .rst(rst),
+    .clk(clk),
+    .active_pixels(active_pixels),
+    .entity_mem_done(entity_mem_done),
+    .room_mem_done(room_mem_done),
+    .tile_mem_done(tile_mem_done),
+    .color_update_done(color_update_done),
 
+    .VGC(VGC),
+    .VEC(VEC)
+);
 
 // TODO:
 /*    
@@ -200,8 +231,6 @@ vga_driver vga_driver_inst (
             read entity mem -> update current color at the x,y on VGA driver
                 IF THE ENTITY HAS A THE DESIGNATED BACKGROUND COLOR, THEN go to 1
 
-
-    The Programing for the state machines
 */
 
 
