@@ -1,0 +1,135 @@
+// This is the memory block for the game the ONLY thing that should be initialized is the entity data to set up a blank list
+// The other memory blocks should be pre made and loaded into the FPGA using the .mif files in the project folder 
+// to design the mem parts use the python script in the project folder to generate the .mif files for the entity data memory block and the other memory blocks
+
+
+// ---------------------------------------------------------------------- THE ENTITY DATA MEMORY BLOCK
+module entityData #(
+    parameter DATA_WIDTH = 36,              // Size of each memory word (36 bits)
+    parameter MAX_ENTITIES  = 16,            // Total number of memory slots (16 max entities)
+    parameter ADDR_WIDTH = $clog2(MAX_ENTITIES) // Address width based on the number of entities
+)(
+    input  wire                    clk,    // Clock signal
+    input  wire                    we,     // Write Enable (1 = Write, 0 = Read)
+    input  wire [ADDR_WIDTH-1:0]   addr,   // Address bus
+    input  wire [DATA_WIDTH-1:0]   din,    // Data Input bus
+    output reg  [DATA_WIDTH-1:0]   dout    // Data Output register
+);
+
+    reg [DATA_WIDTH-1:0] memory_array [0:MEM_DEPTH-1];
+
+    // Read and Write Logic
+    always @(posedge clk) begin
+        if (we) begin
+            memory_array[addr] <= din;     // Write behavior: store data into the address
+        end
+        
+        dout <= memory_array[addr];        // Read behavior: read data out from the address
+    end
+
+endmodule
+
+// ---------------------------------------------------------------------- THE ENTITY SPRITE MEMORY BLOCK JUST HOW TO ADRESS IT
+module entitySprite #(
+    parameter DATA_WIDTH = 24,              // VGA color being 24 bits (8 bits per channel)
+    parameter SIZE_OF_SPRITE = 256,          // Size of each sprite (16x16 pixels)
+    parameter ADDR_WIDTH = $clog2(MAX_ENTITIES) // Address width based on the number of entities
+)(
+    input  wire                    clk,    // Clock signal
+    input  wire                    we,     // Write Enable (1 = Write, 0 = Read)
+    input  wire [ADDR_WIDTH-1:0]   addr,   // Address bus
+    input  wire [DATA_WIDTH-1:0]   din,    // Data Input bus
+    output reg  [DATA_WIDTH-1:0]   dout    // Data Output register
+);
+
+    reg [DATA_WIDTH-1:0] memory_array [0:MEM_DEPTH-1];
+
+    // Read and Write Logic
+    always @(posedge clk) begin
+        if (we) begin
+            memory_array[addr] <= din;     // Write behavior: store data into the address
+        end
+        
+        dout <= memory_array[addr];        // Read behavior: read data out from the address
+    end
+
+endmodule
+
+// ---------------------------------------------------------------------- THE TILE MEMORY BLOCK JUST HOW TO ADRESS IT
+module roomTiles #(
+    parameter DATA_WIDTH = 24,              // VGA color being 24 bits (8 bits per channel)
+    parameter SIZE_OF_SPRITE = 256,          // Size of each sprite (16x16 pixels)
+    parameter ADDR_WIDTH = $clog2(MAX_ENTITIES) // Address width based on the number of entities
+)(
+    input  wire                    clk,    // Clock signal
+    input  wire                    we,     // Write Enable (1 = Write, 0 = Read)
+    input  wire [ADDR_WIDTH-1:0]   addr,   // Address bus
+    input  wire [DATA_WIDTH-1:0]   din,    // Data Input bus
+    output reg  [DATA_WIDTH-1:0]   dout    // Data Output register
+);
+
+    reg [DATA_WIDTH-1:0] memory_array [0:MEM_DEPTH-1];
+
+    // Read and Write Logic
+    always @(posedge clk) begin
+        if (we) begin
+            memory_array[addr] <= din;     // Write behavior: store data into the address
+        end
+        
+        dout <= memory_array[addr];        // Read behavior: read data out from the address
+    end
+
+endmodule
+
+
+// ---------------------------------------------------------------------- THE ROOM MEMORY BLOCK JUST HOW TO ADRESS IT
+module roomMem #(
+    parameter DATA_WIDTH = 6,              // 6 bits of data for tile choice 
+    parameter SIZE_OF_ROOM = 1200,          // Size of each room (40 x 30 tiles of 16x16 pixels chunks)
+    parameter ADDR_WIDTH = $clog2(MAX_ENTITIES) // Address width based on the number of entities
+)(
+    input  wire                    clk,    // Clock signal
+    input  wire                    we,     // Write Enable (1 = Write, 0 = Read)
+    input  wire [ADDR_WIDTH-1:0]   addr,   // Address bus
+    input  wire [DATA_WIDTH-1:0]   din,    // Data Input bus
+    output reg  [DATA_WIDTH-1:0]   dout    // Data Output register
+);
+
+    reg [DATA_WIDTH-1:0] memory_array [0:MEM_DEPTH-1];
+
+    // Read and Write Logic
+    always @(posedge clk) begin
+        if (we) begin
+            memory_array[addr] <= din;     // Write behavior: store data into the address
+        end
+        
+        dout <= memory_array[addr];        // Read behavior: read data out from the address
+    end
+
+endmodule
+
+// ---------------------------------------------------------------------- THE MAP MEMORY BLOCK JUST HOW TO ADRESS IT
+module mapMem #(
+    parameter DATA_WIDTH = 4,              // 3 bits of data for room choice 
+    parameter SIZE_OF_ROOM = 16,          // Size of each map is 4 x 4
+    parameter ADDR_WIDTH = $clog2(MAX_ENTITIES) // Address width based on the number of entities
+)(
+    input  wire                    clk,    // Clock signal
+    input  wire                    we,     // Write Enable (1 = Write, 0 = Read)
+    input  wire [ADDR_WIDTH-1:0]   addr,   // Address bus
+    input  wire [DATA_WIDTH-1:0]   din,    // Data Input bus
+    output reg  [DATA_WIDTH-1:0]   dout    // Data Output register
+);
+
+    reg [DATA_WIDTH-1:0] memory_array [0:MEM_DEPTH-1];
+
+    // Read and Write Logic
+    always @(posedge clk) begin
+        if (we) begin
+            memory_array[addr] <= din;     // Write behavior: store data into the address
+        end
+        
+        dout <= memory_array[addr];        // Read behavior: read data out from the address
+    end
+
+endmodule
