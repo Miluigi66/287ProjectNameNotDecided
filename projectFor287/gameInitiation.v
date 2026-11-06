@@ -100,9 +100,9 @@ module gameInitiation	(
 
 
 
+// ------------------------------------------------------------------------------ MEMORY BLOCKS
 
-
-
+// TODO ADD MEM BLOCKS
 
 
 
