@@ -1,0 +1,24 @@
+module frame_tick_60Hz (
+    input  wire clk_in,   // 50 MHz input clock
+    input  wire rst_n,    // Active-low reset
+    output reg  tick_60Hz // 1-cycle pulse at 60 Hz
+);
+    // 50,000,000 Hz / 60 Hz = 833,333 cycles per frame
+    parameter MAX_COUNT = 20'd833_332;
+    reg [19:0] counter;
+
+    always @(posedge clk_in or negedge rst_n) begin
+        if (!rst_n) begin
+            counter   <= 20'd0;
+            tick_60Hz <= 1'b0;
+        end else begin
+            if (counter == MAX_COUNT) begin
+                counter   <= 20'd0;
+                tick_60Hz <= 1'b1; // High for exactly 1 clock cycle
+            end else begin
+                counter   <= counter + 1'b1;
+                tick_60Hz <= 1'b0;
+            end
+        end
+    end
+endmodule
