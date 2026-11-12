@@ -1,0 +1,223 @@
+{
+  "description": "Layout tuned to uploaded Link sprite sheet. Coordinates are logical pixels after 10x nearest-neighbor downscaling.",
+  "source_size": [
+    1180,
+    1860
+  ],
+  "scale": 10,
+  "transparent_rgb": "000000",
+  "frame_width": 32,
+  "frame_height": 32,
+  "tile_size": 16,
+  "frames": [
+    {
+      "name": "down_idle",
+      "row": 0,
+      "column": 0,
+      "x": 0,
+      "y": 0,
+      "base_crop": [
+        5,
+        6
+      ]
+    },
+    {
+      "name": "left_idle",
+      "row": 0,
+      "column": 1,
+      "x": 29,
+      "y": 0,
+      "base_crop": [
+        34,
+        6
+      ]
+    },
+    {
+      "name": "up_idle",
+      "row": 0,
+      "column": 2,
+      "x": 55,
+      "y": 0,
+      "base_crop": [
+        66,
+        6
+      ]
+    },
+    {
+      "name": "right_idle",
+      "row": 0,
+      "column": 3,
+      "x": 86,
+      "y": 0,
+      "base_crop": [
+        97,
+        6
+      ]
+    },
+    {
+      "name": "down_walk",
+      "row": 1,
+      "column": 0,
+      "x": 0,
+      "y": 30,
+      "base_crop": [
+        5,
+        36
+      ]
+    },
+    {
+      "name": "left_walk",
+      "row": 1,
+      "column": 1,
+      "x": 29,
+      "y": 30,
+      "base_crop": [
+        35,
+        36
+      ]
+    },
+    {
+      "name": "up_walk",
+      "row": 1,
+      "column": 2,
+      "x": 55,
+      "y": 30,
+      "base_crop": [
+        66,
+        36
+      ]
+    },
+    {
+      "name": "right_walk",
+      "row": 1,
+      "column": 3,
+      "x": 86,
+      "y": 30,
+      "base_crop": [
+        97,
+        36
+      ]
+    },
+    {
+      "name": "down_attack_ready",
+      "row": 2,
+      "column": 0,
+      "x": 0,
+      "y": 60
+    },
+    {
+      "name": "left_attack_ready",
+      "row": 2,
+      "column": 1,
+      "x": 29,
+      "y": 60
+    },
+    {
+      "name": "up_attack_ready",
+      "row": 2,
+      "column": 2,
+      "x": 55,
+      "y": 60
+    },
+    {
+      "name": "right_attack_ready",
+      "row": 2,
+      "column": 3,
+      "x": 86,
+      "y": 60
+    },
+    {
+      "name": "down_sword_orange",
+      "row": 3,
+      "column": 0,
+      "x": 0,
+      "y": 88
+    },
+    {
+      "name": "left_sword_orange",
+      "row": 3,
+      "column": 1,
+      "x": 29,
+      "y": 88
+    },
+    {
+      "name": "up_sword_orange",
+      "row": 3,
+      "column": 2,
+      "x": 55,
+      "y": 88
+    },
+    {
+      "name": "right_sword_orange",
+      "row": 3,
+      "column": 3,
+      "x": 86,
+      "y": 88
+    },
+    {
+      "name": "down_sword_blue",
+      "row": 4,
+      "column": 0,
+      "x": 0,
+      "y": 116
+    },
+    {
+      "name": "left_sword_blue",
+      "row": 4,
+      "column": 1,
+      "x": 29,
+      "y": 116
+    },
+    {
+      "name": "up_sword_blue",
+      "row": 4,
+      "column": 2,
+      "x": 55,
+      "y": 116
+    },
+    {
+      "name": "right_sword_blue",
+      "row": 4,
+      "column": 3,
+      "x": 86,
+      "y": 116
+    },
+    {
+      "name": "down_item",
+      "row": 5,
+      "column": 0,
+      "x": 0,
+      "y": 150
+    },
+    {
+      "name": "down_item_both_hands",
+      "row": 5,
+      "column": 1,
+      "x": 29,
+      "y": 150
+    },
+    {
+      "name": "bow",
+      "row": 5,
+      "column": 3,
+      "x": 86,
+      "y": 150
+    }
+  ],
+  "column_boundaries": [
+    0,
+    26,
+    56,
+    84,
+    118
+  ],
+  "row_boundaries": [
+    0,
+    30,
+    60,
+    85,
+    120,
+    150,
+    186
+  ]
+}
