@@ -66,7 +66,7 @@ module gameInitiation	(
 	//inout 		          		PS2_DAT2,
 
 	//////////// SW //////////
-	//input 		     [9:0]		SW,
+	input 		     [9:0]		SW,
 
 	//////////// Video-In //////////
 	//input 		          		TD_CLK27,
@@ -119,13 +119,106 @@ wire pause;
 assign pause = SW[1];
 
 
+// ----------------------------------- Instantiation of the 60Hz clock tick generator
+wire clock_60hz_tick;
+frame_tick_60Hz frame_tick_60Hz_inst (
+	.clk_in(clk),
+	.rst_n(rst),
+	.tick_60Hz(clock_60hz_tick)
+);
+
+// ----------------------------------- Instantiation of memory wire/reg declarations
+// Entity data memory block signals
+wire [35:0] entity_data_dout;
+wire entity_data_we;
+wire [3:0] entity_data_addr;
+wire [35:0] entity_data_din;
+// Entity sprite memory block signals
+wire [23:0] entity_sprite_dout;
+wire entity_sprite_we;
+wire [7:0] entity_sprite_addr;
+wire [23:0] entity_sprite_din;
+// Room tile memory block signals
+wire [23:0] room_tile_dout;
+wire [23:0] room_tile_set0_dout;
+wire [23:0] room_tile_set1_dout;
+wire room_tile_we;
+wire [7:0] room_tile_addr;
+wire [23:0] room_tile_din;
+// Map data memory block signals
+wire [2:0] map_data_dout;
+wire map_data_we;
+wire [3:0] map_data_addr;
+wire [2:0] map_data_din;
+// Room tile memory block signals
+wire [5:0] room_data_dout;
+wire room_data_we;
+wire [10:0] room_data_addr;
+wire [5:0] room_data_din;
+
 
 // ------------------------------------------------------------------------------ MEMORY BLOCKS
+/*
+entitySprite #(
+	.FILE_NAME("mem/default.mif")
+) entitySprite_inst (
+	.clk(clk),
+	.we(entity_sprite_we),
+	.addr(entity_sprite_addr),
+	.din(entity_sprite_din),
+	.dout(entity_sprite_dout)
+);
+*/
 
-// TODO ADD MEM BLOCKS
+// Both tile memories share one read/write interface. The selected output
+// below is based on the tile value stored in room memory.
+roomTiles #(
+	.FILE_NAME("mem/default.mif")
+) roomTiles_set0_inst (
+	.clk(clk),
+	.we(room_tile_we),
+	.addr(room_tile_addr),
+	.din(room_tile_din),
+	.dout(room_tile_set0_dout)
+);
+
+roomTiles #(
+	.FILE_NAME("mem/theTeal.mif")
+) roomTiles_set1_inst (
+	.clk(clk),
+	.we(room_tile_we),
+	.addr(room_tile_addr),
+	.din(room_tile_din),
+	.dout(room_tile_set1_dout)
+);
+
+// The room tile output is selected based on the value read from the room memory.
+assign room_tile_dout = (room_data_dout == 6'd1)
+	? room_tile_set1_dout
+	: room_tile_set0_dout;
+
+// blank room of just 0s
+roomMem #(
+	.FILE_NAME("mem/defultRoom.mif")
+) roomMem_inst (
+	.clk(clk),
+	.we(room_data_we),
+	.addr(room_data_addr),
+	.din(room_data_din),
+	.dout(room_data_dout)
+);
 
 
-
+// blank map of just 0s
+mapMem #(
+	.FILE_NAME("mem/defultMap.mif")
+) mapMem_inst (
+	.clk(clk),
+	.we(map_data_we),
+	.addr(map_data_addr),
+	.din(map_data_din),
+	.dout(map_data_dout)
+);
 
 
 // ----------------------------------- Parameters for global state machine PROCESSING BLOCK
@@ -135,14 +228,17 @@ assign pause = SW[1];
 // ----------------------------------- Instantiation of State Machine Cores
 // PROCESSING BLOCK
     // State Machine Cores
-    wire SMC, SGC, SCC;
+    wire [2:0] SMC;
+	wire [2:0] SGC;
+	wire [2:0] SCC;
     // State helper signals
     wire load_map_done, entity_list_done, current_entity_is_player, room_collision_done, enemy_collision_done;
 // VGA BLOCK
     // State Machine Cores
-    wire VGC, VEC;
+    wire [2:0] VGC;
+	wire [2:0] VEC;
     // State helper signals
-    wire entity_mem_done, room_mem_done, tile_mem_done, color_update_done;
+    wire entity_mem_done, room_mem_done, tile_mem_done, color_update_done, map_data_done;
 
 
 
@@ -157,7 +253,7 @@ assign pause = SW[1];
 */
 
 
-
+/*
 
 // ----------------------------------- Instantiation of the mainProcessingLoop
 mainProcessingLoop mainProcessingLoop_inst (
@@ -176,14 +272,7 @@ mainProcessingLoop mainProcessingLoop_inst (
     .SCC(SCC)
 );
 
-// ----------------------------------- Instantiation of the 60Hz clock tick generator
-frame_tick_60Hz frame_tick_60Hz_inst (
-    .clk_in(clk),
-    .rst_n(rst),
-    .tick_60Hz(clock_60hz_tick)
-);
-
-
+*/
 
 // -------------------------------------------------------------------------------------- VGA BLOCKS
 
@@ -206,10 +295,25 @@ mainVGALoop mainVGALoop_inst (
     .rst(rst),
     .clk(clk),
     .active_pixels(active_pixels),
-    .entity_mem_done(entity_mem_done),
-    .room_mem_done(room_mem_done),
-    .tile_mem_done(tile_mem_done),
-    .color_update_done(color_update_done),
+
+	// VGA data to send/read (read from x and y and output vga_color)
+	.x(x),
+	.y(y),
+	.vga_color(vga_color),
+
+	// Room and map memory read signals
+	.map_data_dout(map_data_dout),
+	.map_data_we(map_data_we),
+	.map_data_addr(map_data_addr),
+	.map_data_din(map_data_din),
+	.room_data_dout(room_data_dout),
+	.room_data_we(room_data_we),
+	.room_data_addr(room_data_addr),
+	.room_data_din(room_data_din),
+	.room_tile_dout(room_tile_dout),
+	.room_tile_we(room_tile_we),
+	.room_tile_addr(room_tile_addr),
+	.room_tile_din(room_tile_din),
 
     .VGC(VGC),
     .VEC(VEC)
