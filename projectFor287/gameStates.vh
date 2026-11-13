@@ -32,4 +32,5 @@ localparam
 	READ_ENTITY_MEM = 3'b001, // Reads the current entity data from the entity memory and goes to read room memory if the color is the background color
 	READ_ROOM_MEM = 3'b010, // Reads the current room data from the room memory and goes to read tile memory
 	READ_TILE_MEM = 3'b011, // Reads the current tile data from the tile memory and goes to update VGA color
-	UPDATE_VGA_COLOR = 3'b100; // Updates the VGA color output with the current color data from the VGA memory and goes back to read entity memory
+	UPDATE_VGA_COLOR = 3'b100, // Updates the VGA color output with the current color data from the VGA memory
+	READ_MAP_DATA = 3'b101; // Reads the current map data before reading room memory
