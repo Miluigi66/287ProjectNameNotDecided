@@ -138,10 +138,17 @@ wire [23:0] entity_sprite_dout;
 wire entity_sprite_we;
 wire [7:0] entity_sprite_addr;
 wire [23:0] entity_sprite_din;
+
+
 // Room tile memory block signals
-wire [23:0] room_tile_dout;
+wire [23:0] room_tile_dout; // The output of the selected room tile memory block
+// The many rooms that it could be 
 wire [23:0] room_tile_set0_dout;
 wire [23:0] room_tile_set1_dout;
+
+
+
+
 wire room_tile_we;
 wire [7:0] room_tile_addr;
 wire [23:0] room_tile_din;
@@ -193,9 +200,17 @@ roomTiles #(
 );
 
 // The room tile output is selected based on the value read from the room memory.
-assign room_tile_dout = (room_data_dout == 6'd1)
-	? room_tile_set1_dout
-	: room_tile_set0_dout;
+always @(*) begin
+	case (room_data_dout)
+		6'd0: room_tile_dout = room_tile_set0_dout;
+		6'd1: room_tile_dout = room_tile_set1_dout;
+		default: room_tile_dout = 24'h000000; // Default to black if no match
+	endcase
+end
+
+
+
+
 
 // blank room of just 0s
 roomMem #(
