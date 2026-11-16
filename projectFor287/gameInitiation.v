@@ -54,7 +54,7 @@ module gameInitiation	(
 	//output		          		IRDA_TXD,
 
 	//////////// KEY //////////
-	//input 		     [3:0]		KEY,
+	input 		     [3:0]		KEY,
 
 	//////////// LED //////////
 	//output		     [9:0]		LEDR,
@@ -133,18 +133,20 @@ wire [35:0] entity_data_dout;
 wire entity_data_we;
 wire [3:0] entity_data_addr;
 wire [35:0] entity_data_din;
+
+
 // Entity sprite memory block signals
 wire [23:0] entity_sprite_dout;
 wire entity_sprite_we;
 wire [7:0] entity_sprite_addr;
 wire [23:0] entity_sprite_din;
 
-
+// -------------------- Each room
 // Room tile memory block signals
-wire [23:0] room_tile_dout; // The output of the selected room tile memory block
-// The many rooms that it could be 
+reg [23:0] room_tile_dout; // The output of the selected room tile memory block
 wire [23:0] room_tile_set0_dout;
 wire [23:0] room_tile_set1_dout;
+wire [23:0] room_tile_set2_dout;
 
 
 
@@ -158,16 +160,49 @@ wire map_data_we;
 wire [3:0] map_data_addr;
 wire [2:0] map_data_din;
 // Room tile memory block signals
-wire [5:0] room_data_dout;
+reg [5:0] room_data_dout;
+wire [5:0] room_data_set0_dout;
+wire [5:0] room_data_set1_dout;
+
+
+
 wire room_data_we;
 wire [10:0] room_data_addr;
 wire [5:0] room_data_din;
 
 
-// ------------------------------------------------------------------------------ MEMORY BLOCKS
+// -------------------- All entity data
+/* How the bits are laid out for the entity data memory block
+    35:30 - Entity ID (6 bits)
+    29:20 - X Position (10 bits)
+    19:10 - Y Position (10 bits)
+    9:8   - Direction (2 bits)
+    7:4   - AI State (4 bits)
+    3:0   - HP (4 bits)
+*/
+
+// Player
+
+reg [9:0] playerX;
+reg [9:0] playerY;
+
 /*
+always @(*)
+begin
+	{playerX, playerY} = playerData[29:10];
+end
+*/
+reg [35:0] playerData;
+
+
+
+
+// ------------------------------------------------------------------------------ MEMORY BLOCKS
+
+
+// ---------------------------------------------------- Sprites
 entitySprite #(
-	.FILE_NAME("mem/default.mif")
+	.FILE_NAME("mem/smileFace.mif")
 ) entitySprite_inst (
 	.clk(clk),
 	.we(entity_sprite_we),
@@ -175,10 +210,15 @@ entitySprite #(
 	.din(entity_sprite_din),
 	.dout(entity_sprite_dout)
 );
-*/
+assign entity_sprite_we = 1'b0; // No writing to the sprite memory in this design
+assign entity_sprite_din = 24'h000000; // Default to black if no match
 
-// Both tile memories share one read/write interface. The selected output
-// below is based on the tile value stored in room memory.
+
+
+// ---------------------------------------------------- Tiles
+// Tile ID 0 is black, ID 1 is a white wall, and ID 2 is a rainbow wall.
+
+// ID 0 = default tile set
 roomTiles #(
 	.FILE_NAME("mem/default.mif")
 ) roomTiles_set0_inst (
@@ -190,7 +230,7 @@ roomTiles #(
 );
 
 roomTiles #(
-	.FILE_NAME("mem/theTeal.mif")
+	.FILE_NAME("mem/whiteWall.mif")
 ) roomTiles_set1_inst (
 	.clk(clk),
 	.we(room_tile_we),
@@ -199,18 +239,29 @@ roomTiles #(
 	.dout(room_tile_set1_dout)
 );
 
+roomTiles #(
+	.FILE_NAME("mem/rainbowWall.mif")
+) roomTiles_set2_inst (
+	.clk(clk),
+	.we(room_tile_we),
+	.addr(room_tile_addr),
+	.din(room_tile_din),
+	.dout(room_tile_set2_dout)
+);
+
+
 // The room tile output is selected based on the value read from the room memory.
 always @(*) begin
 	case (room_data_dout)
 		6'd0: room_tile_dout = room_tile_set0_dout;
 		6'd1: room_tile_dout = room_tile_set1_dout;
+		6'd2: room_tile_dout = room_tile_set2_dout;
 		default: room_tile_dout = 24'h000000; // Default to black if no match
 	endcase
 end
 
 
-
-
+// ---------------------------------------------------- Rooms
 
 // blank room of just 0s
 roomMem #(
@@ -220,10 +271,32 @@ roomMem #(
 	.we(room_data_we),
 	.addr(room_data_addr),
 	.din(room_data_din),
-	.dout(room_data_dout)
+	.dout(room_data_set0_dout)
+);
+
+roomMem #(
+	.FILE_NAME("mem/rainbowRoom.mif")
+) roomMem_set1_inst (
+	.clk(clk),
+	.we(room_data_we),
+	.addr(room_data_addr),
+	.din(room_data_din),
+	.dout(room_data_set1_dout)
 );
 
 
+always @(*) begin
+	case (map_data_dout)
+		3'd0: room_data_dout = room_data_set0_dout;
+		3'd1: room_data_dout = room_data_set1_dout;
+		default: room_data_dout = room_data_set0_dout;
+	endcase
+end
+
+
+// ---------------------------------------------------- Maps
+
+// The room tile output is selected based on the tile ID stored in room memory.
 // blank map of just 0s
 mapMem #(
 	.FILE_NAME("mem/defultMap.mif")
@@ -235,7 +308,6 @@ mapMem #(
 	.dout(map_data_dout)
 );
 
-
 // ----------------------------------- Parameters for global state machine PROCESSING BLOCK
 `include "gameStates.vh"
 
@@ -243,7 +315,6 @@ mapMem #(
 // ----------------------------------- Instantiation of State Machine Cores
 // PROCESSING BLOCK
     // State Machine Cores
-    wire [2:0] SMC;
 	wire [2:0] SGC;
 	wire [2:0] SCC;
     // State helper signals
@@ -289,6 +360,38 @@ mainProcessingLoop mainProcessingLoop_inst (
 
 */
 
+// --------------------------------------------------------------------- Temp player movement
+
+// Active-High movement buttons from inverted active-low KEYs
+wire btn_up    = ~KEY[0];
+wire btn_down  = ~KEY[1];
+wire btn_left  = ~KEY[2];
+wire btn_right = ~KEY[3];
+parameter MOVESPEED = 1;
+
+
+always @(posedge clk or negedge rst) begin
+	if (!rst) begin
+		playerX <= 10'd312;
+		playerY <= 10'd232;
+	end else if (clock_60hz_tick) begin
+		if (btn_left && !btn_right && playerX >= MOVESPEED)
+			playerX <= playerX - MOVESPEED;
+		else if (btn_right && !btn_left && playerX + MOVESPEED <= 10'd624)
+			playerX <= playerX + MOVESPEED;
+
+		if (btn_up && !btn_down && playerY >= MOVESPEED)
+			playerY <= playerY - MOVESPEED;
+		else if (btn_down && !btn_up && playerY + MOVESPEED <= 10'd464)
+			playerY <= playerY + MOVESPEED;
+	end
+end
+
+
+
+
+
+
 // -------------------------------------------------------------------------------------- VGA BLOCKS
 
 // ----------------------------------- Instantiation of the VGA driver
@@ -310,6 +413,7 @@ mainVGALoop mainVGALoop_inst (
     .rst(rst),
     .clk(clk),
     .active_pixels(active_pixels),
+	.map_view_addr(SW[5:2]), // ---------------------------------------------------Temporary map entry selector
 
 	// VGA data to send/read (read from x and y and output vga_color)
 	.x(x),
@@ -329,6 +433,13 @@ mainVGALoop mainVGALoop_inst (
 	.room_tile_we(room_tile_we),
 	.room_tile_addr(room_tile_addr),
 	.room_tile_din(room_tile_din),
+	.entity_sprite_addr(entity_sprite_addr),
+
+
+	.playerX(playerX),
+	.playerY(playerY),
+	.entity_sprite_dout(entity_sprite_dout),
+
 
     .VGC(VGC),
     .VEC(VEC)
