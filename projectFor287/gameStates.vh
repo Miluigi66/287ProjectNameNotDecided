@@ -34,3 +34,7 @@ localparam
 	READ_TILE_MEM = 3'b011, // Reads the current tile data from the tile memory and goes to update VGA color
 	UPDATE_VGA_COLOR = 3'b100, // Updates the VGA color output with the current color data from the VGA memory
 	READ_MAP_DATA = 3'b101; // Reads the current map data before reading room memory
+
+// ----------------------------------- State parameters for General
+localparam 
+	PLAYERSIZE = 15; // The size of the player sprite in pixels (16x16)
