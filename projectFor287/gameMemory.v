@@ -11,8 +11,6 @@
     9:8   - Direction (2 bits)
     7:4   - AI State (4 bits)
     3:0   - HP (4 bits)
-
-
 */
 
 module entityData #(
